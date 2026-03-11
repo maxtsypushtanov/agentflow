@@ -8,12 +8,14 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { PerplexityAttribution } from "@/components/PerplexityAttribution";
 import Canvas from "@/pages/canvas";
+import SettingsPage from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
 function AppRouter() {
   return (
     <Switch>
       <Route path="/" component={Canvas} />
+      <Route path="/settings" component={SettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -21,7 +23,7 @@ function AppRouter() {
 
 export default function App() {
   const style = {
-    "--sidebar-width": "17rem",
+    "--sidebar-width": "16.5rem",
     "--sidebar-width-icon": "3rem",
   };
 
@@ -30,14 +32,13 @@ export default function App() {
       <TooltipProvider>
         <Router hook={useHashLocation}>
           <SidebarProvider style={style as React.CSSProperties}>
-            <div className="flex h-screen w-full bg-zinc-950 text-zinc-100">
+            <div className="flex h-screen w-full bg-[#0a0a0a] text-[#e4e4e7]">
               <AppSidebar />
               <div className="flex flex-col flex-1 min-w-0">
-                <div className="flex items-center gap-2 px-2 py-1 border-b border-zinc-800 bg-zinc-950">
-                  <SidebarTrigger data-testid="button-sidebar-toggle" className="text-zinc-500 hover:text-zinc-300" />
-                  <span className="text-[10px] text-zinc-700">AgentFlow</span>
+                <div className="flex items-center gap-2 px-2 py-1 border-b border-[#1a1a1a] bg-[#0e0e0e]">
+                  <SidebarTrigger data-testid="button-sidebar-toggle" className="text-[#3f3f46] hover:text-[#71717a]" />
                 </div>
-                <main className="flex-1 overflow-hidden">
+                <main className="flex-1 min-h-0 overflow-hidden">
                   <AppRouter />
                 </main>
                 <PerplexityAttribution />
