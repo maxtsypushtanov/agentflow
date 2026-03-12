@@ -12,6 +12,12 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import type { AgentNodeData, NodeTypeValue } from "@shared/schema";
 
+interface ChatMessage {
+  role: 'user' | 'agent';
+  text: string;
+  timestamp: number;
+}
+
 interface FlowState {
   nodes: Node<AgentNodeData>[];
   edges: Edge[];
@@ -21,6 +27,9 @@ interface FlowState {
   workflowDescription: string;
   workflowPattern: string;
   isSimulating: boolean;
+
+  chatMessages: ChatMessage[];
+  isChatOpen: boolean;
 
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
@@ -41,6 +50,10 @@ interface FlowState {
 
   loadWorkflow: (nodes: Node<AgentNodeData>[], edges: Edge[], id: number, name: string, description: string, pattern?: string) => void;
   clearCanvas: () => void;
+
+  addChatMessage: (role: 'user' | 'agent', text: string) => void;
+  toggleChat: () => void;
+  setChatOpen: (open: boolean) => void;
 
   startSimulation: () => void;
   stopSimulation: () => void;
@@ -72,6 +85,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   workflowDescription: "",
   workflowPattern: "custom",
   isSimulating: false,
+  chatMessages: [],
+  isChatOpen: false,
 
   onNodesChange: (changes) => {
     set({ nodes: applyNodeChanges(changes, get().nodes) as Node<AgentNodeData>[] });
@@ -136,6 +151,12 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   clearCanvas: () => {
     set({ nodes: [], edges: [], selectedNodeId: null, workflowId: null, workflowName: "Untitled Workflow", workflowDescription: "", workflowPattern: "custom" });
   },
+
+  addChatMessage: (role, text) => {
+    set({ chatMessages: [...get().chatMessages, { role, text, timestamp: Date.now() }] });
+  },
+  toggleChat: () => set({ isChatOpen: !get().isChatOpen }),
+  setChatOpen: (open) => set({ isChatOpen: open }),
 
   startSimulation: () => {
     const { nodes } = get();

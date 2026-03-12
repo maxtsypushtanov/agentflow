@@ -1,17 +1,19 @@
 import { useCallback, useRef, useMemo } from "react";
 import {
   ReactFlow, ReactFlowProvider, Background, Controls, MiniMap,
-  BackgroundVariant, type ReactFlowInstance,
+  BackgroundVariant, type ReactFlowInstance, type Node,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useFlowStore } from "@/lib/store";
-import type { NodeTypeValue } from "@shared/schema";
+import type { AgentNodeData, NodeTypeValue } from "@shared/schema";
 import {
   LLMAgentNode, ToolNode, RouterNode, HumanReviewNode, InputNode, OutputNode,
   TransformerNode, MemoryNode, SubagentGroupNode, CodeExecutorNode, ValidatorNode,
   BlackboardNode, AggregatorNode, LoopNode,
 } from "@/components/nodes/BaseNode";
 import { Toolbar } from "@/components/Toolbar";
+import { NodePropertiesModal } from "@/components/NodePropertiesModal";
+import { ChatPanel } from "@/components/ChatPanel";
 
 const nodeTypes = {
   "llm-agent": LLMAgentNode, "tool": ToolNode, "router": RouterNode,
@@ -40,9 +42,8 @@ function CanvasInner() {
     event.preventDefault();
     const type = event.dataTransfer.getData("application/agentflow-node") as NodeTypeValue;
     if (!type || !reactFlowInstance.current || !reactFlowWrapper.current) return;
-    const bounds = reactFlowWrapper.current.getBoundingClientRect();
     const position = reactFlowInstance.current.screenToFlowPosition({
-      x: event.clientX - bounds.left, y: event.clientY - bounds.top,
+      x: event.clientX, y: event.clientY,
     });
     addNode(type, position);
   }, [addNode]);
@@ -52,10 +53,18 @@ function CanvasInner() {
     setTimeout(() => instance.fitView({ padding: 0.2, duration: 300 }), 100);
   }, []);
 
+  const onNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
+    setSelectedNodeId(node.id);
+  }, [setSelectedNodeId]);
+
+  const onNodeClick = useCallback((_event: React.MouseEvent, _node: Node) => {
+    // Single click selects visually (handled by React Flow) but doesn't open modal
+  }, []);
+
   const proOptions = useMemo(() => ({ hideAttribution: true }), []);
 
   return (
-    <div className="flex flex-col h-full" data-testid="canvas-container">
+    <div className="flex flex-col h-full relative" data-testid="canvas-container">
       <Toolbar />
       <div ref={reactFlowWrapper} className="flex-1">
         <ReactFlow
@@ -64,6 +73,8 @@ function CanvasInner() {
           nodeTypes={nodeTypes} defaultEdgeOptions={defaultEdgeOptions}
           onDragOver={onDragOver} onDrop={onDrop} onInit={onInit}
           onPaneClick={() => setSelectedNodeId(null)}
+          onNodeDoubleClick={onNodeDoubleClick}
+          onNodeClick={onNodeClick}
           fitView snapToGrid snapGrid={[20, 20]}
           proOptions={proOptions} minZoom={0.1} maxZoom={3}
           deleteKeyCode={["Backspace", "Delete"]}
@@ -82,6 +93,8 @@ function CanvasInner() {
           />
         </ReactFlow>
       </div>
+      <ChatPanel />
+      <NodePropertiesModal />
     </div>
   );
 }

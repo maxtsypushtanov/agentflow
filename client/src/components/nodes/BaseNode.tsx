@@ -61,7 +61,7 @@ export function BaseNode({ data, id, selected }: NodeProps & { data: AgentNodeDa
   return (
     <div
       className={cn(
-        "relative group rounded-xl border backdrop-blur-md transition-all duration-200 min-w-[190px] max-w-[230px]",
+        "relative group rounded-xl border backdrop-blur-md transition-all duration-200 min-w-[190px] max-w-[230px] hover:scale-[1.02]",
         colors.bg,
         colors.border,
         selected && "ring-1 ring-white/20 shadow-lg",

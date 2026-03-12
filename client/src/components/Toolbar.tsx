@@ -1,11 +1,11 @@
 import { useFlowStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Play, Square, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
+import { Play, Square, ZoomIn, ZoomOut, Maximize2, MessageSquare } from "lucide-react";
 import { useReactFlow } from "@xyflow/react";
 
 export function Toolbar() {
-  const { workflowName, setWorkflowName, workflowPattern, isSimulating, startSimulation, stopSimulation, nodes } = useFlowStore();
+  const { workflowName, setWorkflowName, workflowPattern, isSimulating, startSimulation, stopSimulation, nodes, toggleChat } = useFlowStore();
   const { zoomIn, zoomOut, fitView } = useReactFlow();
 
   return (
@@ -52,6 +52,13 @@ export function Toolbar() {
             <Play className="w-3 h-3" /> Run
           </Button>
         )}
+
+        <div className="w-px h-5 bg-[#1e1e1e] mx-1" />
+
+        <Button size="icon" variant="ghost" className="h-7 w-7 text-[#525252] hover:text-[#a1a1aa]"
+          onClick={toggleChat} data-testid="button-toggle-chat-toolbar">
+          <MessageSquare className="w-3.5 h-3.5" />
+        </Button>
       </div>
     </div>
   );

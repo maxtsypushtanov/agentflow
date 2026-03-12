@@ -60,9 +60,18 @@ export function NodePalette({ onDragStart }: NodePaletteProps) {
                 onDragStart={(e) => {
                   e.dataTransfer.setData("application/agentflow-node", item.type);
                   e.dataTransfer.effectAllowed = "move";
+                  const el = e.currentTarget;
+                  const ghost = el.cloneNode(true) as HTMLElement;
+                  ghost.style.position = "absolute";
+                  ghost.style.top = "-1000px";
+                  ghost.style.opacity = "0.85";
+                  ghost.style.width = `${el.offsetWidth}px`;
+                  document.body.appendChild(ghost);
+                  e.dataTransfer.setDragImage(ghost, el.offsetWidth / 2, 16);
+                  requestAnimationFrame(() => document.body.removeChild(ghost));
                   onDragStart(item.type);
                 }}
-                className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg cursor-grab active:cursor-grabbing transition-all hover:bg-[#1e1e1e] group/item border border-transparent hover:border-[#2a2a2a]"
+                className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg cursor-grab active:cursor-grabbing active:opacity-50 transition-all hover:bg-[#1e1e1e] group/item border border-transparent hover:border-[#2a2a2a]"
                 data-testid={`palette-node-${item.type}`}
               >
                 <div className="p-1 rounded-md" style={{ backgroundColor: `${item.accent}18` }}>

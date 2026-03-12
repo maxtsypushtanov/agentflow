@@ -3,16 +3,12 @@ import {
   SidebarGroup, SidebarGroupContent, SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { NodePalette } from "@/components/panels/NodePalette";
-import { PropertiesPanel } from "@/components/panels/PropertiesPanel";
 import { WorkflowList } from "@/components/panels/WorkflowList";
-import { useFlowStore } from "@/lib/store";
-import type { NodeTypeValue } from "@shared/schema";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Settings, Cpu } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 export function AppSidebar() {
-  const { selectedNodeId } = useFlowStore();
   const [location] = useLocation();
 
   return (
@@ -64,7 +60,7 @@ export function AppSidebar() {
 
               <SidebarGroup>
                 <SidebarGroupContent className="px-3 py-2">
-                  {selectedNodeId ? <PropertiesPanel /> : <WorkflowList />}
+                  <WorkflowList />
                 </SidebarGroupContent>
               </SidebarGroup>
             </>
