@@ -57,7 +57,15 @@ export async function registerRoutes(server: Server, app: Express) {
   });
 
   app.patch("/api/settings", async (req, res) => {
-    const settings = await storage.updateSettings(req.body);
+    // Don't overwrite real keys with masked values from the frontend
+    const body = { ...req.body };
+    if (body.cloudruApiKey && body.cloudruApiKey.startsWith("••")) {
+      delete body.cloudruApiKey;
+    }
+    if (body.cloudruSecret && body.cloudruSecret.startsWith("••")) {
+      delete body.cloudruSecret;
+    }
+    const settings = await storage.updateSettings(body);
     res.json({
       ...settings,
       cloudruApiKey: settings.cloudruApiKey ? "••••••" + settings.cloudruApiKey.slice(-4) : "",
@@ -167,19 +175,29 @@ export async function registerRoutes(server: Server, app: Express) {
 
         res.json({ success: true, output: output.trim(), language });
       } else if (language === "python") {
-        // Python execution via child process
-        const { exec } = await import("child_process");
-        const { promisify } = await import("util");
-        const execAsync = promisify(exec);
+        // Python execution via child process with safe stdin pipe
+        const { spawn } = await import("child_process");
         
         try {
-          const { stdout, stderr } = await execAsync(
-            `echo ${JSON.stringify(code)} | python3 -c "import sys; exec(sys.stdin.read())"`,
-            { timeout: maxTimeout }
-          );
-          res.json({ success: true, output: (stdout + (stderr ? "\nSTDERR: " + stderr : "")).trim(), language });
+          const result = await new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
+            const proc = spawn("python3", ["-c", "import sys; exec(sys.stdin.read())"], {
+              timeout: maxTimeout,
+              stdio: ["pipe", "pipe", "pipe"]
+            });
+            let stdout = "", stderr = "";
+            proc.stdout.on("data", (d: Buffer) => stdout += d.toString());
+            proc.stderr.on("data", (d: Buffer) => stderr += d.toString());
+            proc.on("close", (exitCode) => {
+              if (exitCode === 0) resolve({ stdout, stderr });
+              else reject(new Error(stderr || `Process exited with code ${exitCode}`));
+            });
+            proc.on("error", reject);
+            proc.stdin.write(code);
+            proc.stdin.end();
+          });
+          res.json({ success: true, output: (result.stdout + (result.stderr ? "\nSTDERR: " + result.stderr : "")).trim(), language });
         } catch (execErr: any) {
-          res.json({ success: false, output: execErr.stderr || execErr.message, language });
+          res.json({ success: false, output: execErr.message, language });
         }
       } else {
         res.status(400).json({ error: `Unsupported language: ${language}` });

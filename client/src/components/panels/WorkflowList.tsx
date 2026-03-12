@@ -107,7 +107,7 @@ export function WorkflowList() {
             const PatIcon = PATTERN_ICONS[(wf as any).pattern || "custom"] || WfIcon;
             return (
               <div key={wf.id}
-                className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors ${
+                className={`group flex items-center gap-2 px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-colors ${
                   wf.id === workflowId ? "bg-[#1e1e1e] text-[#e4e4e7] border border-[#2a2a2a]" : "text-[#71717a] hover:bg-[#141414] border border-transparent"
                 }`}
                 onClick={() => handleLoad(wf)} data-testid={`workflow-item-${wf.id}`}>
